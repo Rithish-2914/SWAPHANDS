@@ -80,11 +80,3 @@ Database: Firebase (easy auth + storage) or MongoDB.
 Auth: Google OAuth restricted to @vitstudent.ac.in.
 
 Hosting: Vercel
-<img width="1215" height="669" alt="image" src="https://github.com/user-attachments/assets/9fd9f6a7-cb07-4d48-8812-9d0335a83472" />
-<img width="1201" height="685" alt="image" src="https://github.com/user-attachments/assets/7ba83138-eb54-48b4-b082-d2e85f41dfe1" />
-<img width="1211" height="688" alt="image" src="https://github.com/user-attachments/assets/e4669acc-9d86-4675-8e78-8c80109b1dd1" />
-
-
-
-
-
