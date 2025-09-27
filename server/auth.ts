@@ -189,9 +189,15 @@ export function setupAuth(app: Express) {
   );
 
   // Routes with optional trailing slash for Railway compatibility
-  app.post("/api/register/?", async (req, res, next) => {
+  app.post("/api/register", async (req, res, next) => {
     try {
-      const userData = insertUserSchema.parse(req.body);
+      // Normalize hostelBlock to lowercase to match schema enum values
+      const normalizedBody = {
+        ...req.body,
+        hostelBlock: req.body.hostelBlock ? req.body.hostelBlock.toLowerCase() : req.body.hostelBlock
+      };
+      
+      const userData = insertUserSchema.parse(normalizedBody);
       const existingUser = await storage.getUserByEmail(userData.email);
       if (existingUser) {
         return res.status(400).json({ message: "Email already exists" });
@@ -219,23 +225,32 @@ export function setupAuth(app: Express) {
       // Send verification email
       const emailSent = await sendVerificationEmail(userData.email, otp);
       if (!emailSent) {
-        console.error('Failed to send verification email - auto-verifying user for development');
-        // In case email fails, auto-verify the user to prevent lockout
-        await storage.verifyUser(user.id);
+        console.error('Failed to send verification email');
         
-        // Log the user in immediately
-        req.login(user, (err: any) => {
-          if (err) {
-            console.error('Auto-login error after email failure:', err);
-            return res.status(500).json({ message: "Registration failed - unable to send verification email. Please contact support." });
-          }
-          return res.status(201).json({
-            message: "Registration successful! Email verification was skipped due to technical issues.",
-            user: sanitizeUser({ ...user, isVerified: true }),
-            requiresVerification: false
+        // Only auto-verify in development to prevent production security issues
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Development mode: auto-verifying user due to email failure');
+          await storage.verifyUser(user.id);
+          
+          // Log the user in immediately
+          req.login(user, (err: any) => {
+            if (err) {
+              console.error('Auto-login error after email failure:', err);
+              return res.status(500).json({ message: "Registration failed - unable to send verification email. Please contact support." });
+            }
+            return res.status(201).json({
+              message: "Registration successful! Email verification was skipped due to technical issues.",
+              user: sanitizeUser({ ...user, isVerified: true }),
+              requiresVerification: false
+            });
           });
-        });
-        return;
+          return;
+        } else {
+          // In production, fail the registration if email cannot be sent
+          return res.status(500).json({ 
+            message: "Registration failed - unable to send verification email. Please try again later or contact support." 
+          });
+        }
       }
 
       res.status(201).json({ 
@@ -255,7 +270,7 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login/?", (req, res, next) => {
+  app.post("/api/login", (req, res, next) => {
     console.log("[DEBUG /api/login] body received:", req.body);
 
     passport.authenticate(
@@ -273,26 +288,26 @@ export function setupAuth(app: Express) {
     )(req, res, next);
   });
 
-  app.post("/api/logout/?", (req, res, next) => {
+  app.post("/api/logout", (req, res, next) => {
     req.logout((err: any) => {
       if (err) return next(err);
       res.sendStatus(200);
     });
   });
 
-  app.get("/api/user/?", (req, res) => {
+  app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     res.json(sanitizeUser(req.user!));
   });
 
   // Google OAuth routes
-  app.get("/api/auth/google/?", 
+  app.get("/api/auth/google", 
     passport.authenticate("google", { 
       scope: ["profile", "email"] 
     })
   );
 
-  app.get("/api/auth/google/callback/?",
+  app.get("/api/auth/google/callback",
     passport.authenticate("google", { 
       failureRedirect: "/auth?error=google_auth_failed" 
     }),
@@ -306,7 +321,7 @@ export function setupAuth(app: Express) {
   );
 
   // Email verification endpoint
-  app.post("/api/verify-email/?", async (req, res) => {
+  app.post("/api/verify-email", async (req, res) => {
     try {
       const { email, otp } = req.body;
       
@@ -349,7 +364,7 @@ export function setupAuth(app: Express) {
   });
 
   // Resend verification email
-  app.post("/api/resend-verification/?", async (req, res) => {
+  app.post("/api/resend-verification", async (req, res) => {
     try {
       const { email } = req.body;
       
