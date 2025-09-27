@@ -1,12 +1,25 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { storage } from '../server/storage';
 import { sanitizeUser } from './_utils/auth';
+import { createAuthToken, setAuthCookie } from './auth-utils';
 import { z } from 'zod';
 
 const verifyEmailSchema = z.object({
   email: z.string().email(),
   otp: z.string().min(1)
 });
+
+// Lazy initialize storage to handle env var issues gracefully
+let storageInstance: any = null;
+async function getStorage() {
+  if (!storageInstance) {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL environment variable is required');
+    }
+    const { storage } = await import('../server/storage');
+    storageInstance = storage;
+  }
+  return storageInstance;
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -15,6 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { email, otp } = verifyEmailSchema.parse(req.body);
+    const storage = await getStorage();
     
     const user = await storage.getUserByEmail(email);
     if (!user) {
@@ -30,12 +44,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Verify the user and clear OTP
-    await storage.verifyUser(user.id);
+    const verifiedUser = await storage.verifyUser(user.id);
+    
+    // Create auth token and set cookie
+    const token = createAuthToken(user.id);
+    setAuthCookie(res, token);
 
-    const verifiedUser = { ...user, isVerified: true };
     res.json({ 
       message: 'Email verified successfully!', 
-      user: sanitizeUser(verifiedUser)
+      user: sanitizeUser(verifiedUser || { ...user, isVerified: true })
     });
   } catch (error) {
     if (error instanceof z.ZodError) {

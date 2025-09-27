@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { comparePasswords, sanitizeUser } from './_utils/auth';
+import { createAuthToken, setAuthCookie } from './auth-utils';
 import { z } from 'zod';
 
 const loginSchema = z.object({
@@ -65,8 +66,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // For serverless, we'll return the user data and let the client handle session
-    // In a real implementation, you might want to use JWT tokens instead of sessions
+    // Create authentication token and set cookie
+    const token = createAuthToken(user.id);
+    setAuthCookie(res, token);
+    
+    // Return user data
     res.status(200).json(sanitizeUser(user));
   } catch (error) {
     console.error('[login] unexpected error:', error);

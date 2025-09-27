@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { insertUserSchema } from '../shared/schema';
 import { sendVerificationEmail } from '../server/email';
 import { hashPassword, generateOTPWithExpiry, sanitizeUser } from './_utils/auth';
+import { createAuthToken, setAuthCookie } from './auth-utils';
 import { z } from 'zod';
 
 // Lazy initialize storage to handle env var issues gracefully
@@ -64,11 +65,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!emailSent) {
       console.error('Failed to send verification email - auto-verifying user for development');
       // In case email fails, auto-verify the user to prevent lockout
-      await storage.verifyUser(user.id);
+      const verifiedUser = await storage.verifyUser(user.id);
+      
+      // Create auth token and set cookie for auto-verified user
+      const token = createAuthToken(user.id);
+      setAuthCookie(res, token);
       
       return res.status(201).json({
         message: 'Registration successful! Email verification was skipped due to technical issues.',
-        user: sanitizeUser({ ...user, isVerified: true }),
+        user: sanitizeUser(verifiedUser || { ...user, isVerified: true }),
         requiresVerification: false
       });
     }
