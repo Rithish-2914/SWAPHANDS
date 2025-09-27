@@ -1,0 +1,109 @@
+{
+  "message": "handled request",
+  "attributes": {
+    "bytes_read": 0,
+    "duration": 0.000199203,
+    "level": "info",
+    "logger": "http.log.access.log0",
+    "request": {
+      "client_ip": "223.187.113.171",
+      "headers": {
+        "Accept": [
+          "*/*"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br, zstd"
+        ],
+        "Accept-Language": [
+          "en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7"
+        ],
+        "Content-Length": [
+          "232"
+        ],
+        "Content-Type": [
+          "application/json"
+        ],
+        "Origin": [
+          "https://swaphands-production-c5a6.up.railway.app"
+        ],
+        "Priority": [
+          "u=1, i"
+        ],
+        "Referer": [
+          "https://swaphands-production-c5a6.up.railway.app/auth"
+        ],
+        "Sec-Ch-Ua": [
+          "\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\""
+        ],
+        "Sec-Ch-Ua-Mobile": [
+          "?0"
+        ],
+        "Sec-Ch-Ua-Platform": [
+          "\"Windows\""
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Sec-Fetch-Site": [
+          "same-origin"
+        ],
+        "User-Agent": [
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        ],
+        "X-Forwarded-For": [
+          "223.187.113.171"
+        ],
+        "X-Forwarded-Host": [
+          "swaphands-production-c5a6.up.railway.app"
+        ],
+        "X-Forwarded-Proto": [
+          "https"
+        ],
+        "X-Railway-Edge": [
+          "railway/asia-southeast1-eqsg3a"
+        ],
+        "X-Railway-Request-Id": [
+          "bbm3WAWLS-aSwTGrAQeqjw"
+        ],
+        "X-Real-Ip": [
+          "223.187.113.171"
+        ],
+        "X-Request-Start": [
+          "1759007469336"
+        ]
+      },
+      "host": "swaphands-production-c5a6.up.railway.app",
+      "method": "POST",
+      "proto": "HTTP/1.1",
+      "remote_ip": "100.64.0.6",
+      "remote_port": "27086",
+      "uri": "/api/register"
+    },
+    "resp_headers": {
+      "Allow": [
+        "GET, HEAD"
+      ],
+      "Server": [
+        "Caddy"
+      ],
+      "Vary": [
+        "Accept-Encoding"
+      ]
+    },
+    "size": 0,
+    "status": 405,
+    "ts": 1759007469.5084536,
+    "user_id": ""
+  },
+  "tags": {
+    "project": "62067dd7-c1c3-462e-9a33-b93c79c57a0e",
+    "environment": "7332c032-2252-494c-a120-5f3ef9290cb5",
+    "service": "d5de2770-8fef-4242-9bab-7fdab2833bf1",
+    "deployment": "3ebaddcf-cf4c-4b21-a24d-57fecdff33d4",
+    "replica": "2a436d15-9cc7-4bc8-9484-9b941c6dba9a"
+  },
+  "timestamp": "2025-09-27T21:11:12.311693412Z"
+}
