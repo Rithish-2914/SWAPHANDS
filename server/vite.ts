@@ -57,7 +57,7 @@ export async function setupVite(app: Express, server: Server) {
         "index.html",
       );
 
-      // always reload the index.html file from disk in case it changes
+      // always reload the index.html file from disk incase it changes
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
       
       const page = await vite.transformIndexHtml(url, template);
@@ -71,13 +71,18 @@ export async function setupVite(app: Express, server: Server) {
 
 export function serveStatic(app: Express) {
   const distPath = path.resolve(__dirname, "..", "dist");
-  const htmlPath = path.resolve(distPath, "index.html");
+
+  if (!fs.existsSync(distPath)) {
+    console.warn(
+      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+    );
+    return;
+  }
   
-  // Serve static assets from dist folder
   app.use(express.static(distPath));
-  
-  // Serve index.html for all routes (SPA fallback)
-  app.get("*", (_req, res) => {
-    res.sendFile(htmlPath);
+
+  // fall through to index.html if the file doesn't exist
+  app.use("*", (_req, res) => {
+    res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
