@@ -14,30 +14,20 @@ export default defineConfig({
     react(),
   ],
 
-  // Tells Vite where the entry point (index.html) is located.
-  root: path.resolve(__dirname, "client"), 
+  // Tells Vite where your website's root is (for the dev server)
+  root: path.resolve(__dirname, "client"),
 
   resolve: {
     // Keeps your custom import aliases
     alias: {
       "@": path.resolve(__dirname, "client", "src"),
       "@shared": path.resolve(__dirname, "shared"),
-      "@assets": path.resolve(__dirname, "attached_assets"),
     },
   },
 
   build: {
-    // Sets the output directory to the standard 'dist' folder 
-    // at the repository root.
+    // Sets the output directory to the 'dist' folder at the project root
     outDir: path.resolve(__dirname, "dist"), 
     emptyOutDir: true,
-  },
-
-  // Standard server options
-  server: {
-    fs: {
-      strict: true,
-      deny: ["**/.*"],
-    },
   },
 });
