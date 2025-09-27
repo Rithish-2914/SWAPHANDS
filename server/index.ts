@@ -62,18 +62,8 @@ app.use((req, res, next) => {
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
   
-  if (app.get("env") === "production") {
-    // For Vercel deployment, just listen on the port
-    server.listen(port, () => {
-      log(`serving on port ${port}`);
-    });
-  } else {
-    // For development, use host binding
-    server.listen({
-      port,
-      host: "0.0.0.0",
-    }, () => {
-      log(`serving on port ${port}`);
-    });
-  }
+  // Always bind to 0.0.0.0 for proper deployment
+  server.listen(port, "0.0.0.0", () => {
+    log(`serving on port ${port}`);
+  });
 })();
