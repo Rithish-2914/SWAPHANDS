@@ -510,6 +510,11 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Health check endpoint for Railway
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "healthy", timestamp: new Date().toISOString() });
+  });
+
   // Auth providers check
   app.get("/api/auth/providers", (req, res) => {
     res.json({
