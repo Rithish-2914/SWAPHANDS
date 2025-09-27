@@ -6,6 +6,19 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Fix for Railway deployment - handle trailing slashes to prevent POST->GET redirects
+app.use((req, res, next) => {
+  // Skip for static files
+  if (req.url.match(/\.[^.]+$/)) return next();
+  
+  // Remove trailing slash from API routes to prevent redirects
+  if (req.url.length > 1 && req.url.endsWith('/') && req.url.startsWith('/api')) {
+    const withoutSlash = req.url.slice(0, -1);
+    return res.redirect(301, withoutSlash);
+  }
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

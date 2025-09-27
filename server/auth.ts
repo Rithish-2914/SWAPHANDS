@@ -188,8 +188,8 @@ export function setupAuth(app: Express) {
     }
   );
 
-  // Routes
-  app.post("/api/register", async (req, res, next) => {
+  // Routes with optional trailing slash for Railway compatibility
+  app.post("/api/register/?", async (req, res, next) => {
     try {
       const userData = insertUserSchema.parse(req.body);
       const existingUser = await storage.getUserByEmail(userData.email);
@@ -255,7 +255,7 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", (req, res, next) => {
+  app.post("/api/login/?", (req, res, next) => {
     console.log("[DEBUG /api/login] body received:", req.body);
 
     passport.authenticate(
@@ -273,26 +273,26 @@ export function setupAuth(app: Express) {
     )(req, res, next);
   });
 
-  app.post("/api/logout", (req, res, next) => {
+  app.post("/api/logout/?", (req, res, next) => {
     req.logout((err: any) => {
       if (err) return next(err);
       res.sendStatus(200);
     });
   });
 
-  app.get("/api/user", (req, res) => {
+  app.get("/api/user/?", (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     res.json(sanitizeUser(req.user!));
   });
 
   // Google OAuth routes
-  app.get("/api/auth/google", 
+  app.get("/api/auth/google/?", 
     passport.authenticate("google", { 
       scope: ["profile", "email"] 
     })
   );
 
-  app.get("/api/auth/google/callback",
+  app.get("/api/auth/google/callback/?",
     passport.authenticate("google", { 
       failureRedirect: "/auth?error=google_auth_failed" 
     }),
@@ -306,7 +306,7 @@ export function setupAuth(app: Express) {
   );
 
   // Email verification endpoint
-  app.post("/api/verify-email", async (req, res) => {
+  app.post("/api/verify-email/?", async (req, res) => {
     try {
       const { email, otp } = req.body;
       
@@ -349,7 +349,7 @@ export function setupAuth(app: Express) {
   });
 
   // Resend verification email
-  app.post("/api/resend-verification", async (req, res) => {
+  app.post("/api/resend-verification/?", async (req, res) => {
     try {
       const { email } = req.body;
       
@@ -386,7 +386,7 @@ export function setupAuth(app: Express) {
   });
 
   // Password reset functionality
-  app.post("/api/forgot-password", async (req, res) => {
+  app.post("/api/forgot-password/?", async (req, res) => {
     try {
       const { email } = req.body;
       
@@ -421,7 +421,7 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/reset-password", async (req, res) => {
+  app.post("/api/reset-password/?", async (req, res) => {
     try {
       const { email, otp, newPassword } = req.body;
 
@@ -452,7 +452,7 @@ export function setupAuth(app: Express) {
   });
 
   // Admin login endpoint (separate from regular login)
-  app.post("/api/admin/login", (req, res, next) => {
+  app.post("/api/admin/login/?", (req, res, next) => {
     console.log("[DEBUG /api/admin/login] body received:", req.body);
 
     passport.authenticate(
@@ -477,7 +477,7 @@ export function setupAuth(app: Express) {
   });
 
   // Check auth providers availability
-  app.get("/api/auth/providers", (req, res) => {
+  app.get("/api/auth/providers/?", (req, res) => {
     res.json({
       google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)
     });

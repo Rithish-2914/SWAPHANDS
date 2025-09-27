@@ -42,7 +42,7 @@ export function registerRoutes(app: Express): Server {
   setupAuth(app);
 
   // Items routes
-  app.get("/api/items", async (req, res) => {
+  app.get("/api/items/?", async (req, res) => {
     try {
       const filters = {
         category: req.query.category as string,
@@ -60,7 +60,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.get("/api/items/:id", async (req, res) => {
+  app.get("/api/items/:id/?", async (req, res) => {
     try {
       const item = await storage.getItem(req.params.id);
       if (!item) {
@@ -76,7 +76,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.post("/api/items", requireAuth, upload.array("photos", 5), async (req: any, res) => {
+  app.post("/api/items/?", requireAuth, upload.array("photos", 5), async (req: any, res) => {
     try {
       console.log("Raw request body:", req.body);
       console.log("Request files:", req.files);
@@ -119,7 +119,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
     // Draft endpoint: save incomplete listings (allows partial fields)
-  app.post("/api/items/draft", requireAuth, upload.array("photos", 5), async (req, res) => {
+  app.post("/api/items/draft/?", requireAuth, upload.array("photos", 5), async (req, res) => {
     try {
       // Use partial() so all fields are optional
       const parsed = insertItemSchema.partial().safeParse({
@@ -218,7 +218,7 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Wishlist routes
-  app.get("/api/wishlist", requireAuth, async (req, res) => {
+  app.get("/api/wishlist/?", requireAuth, async (req, res) => {
     try {
       const wishlistItems = await storage.getWishlistByUser(req.user!.id);
       res.json(wishlistItems);
@@ -227,7 +227,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.post("/api/wishlist", requireAuth, async (req, res) => {
+  app.post("/api/wishlist/?", requireAuth, async (req, res) => {
     try {
       const wishlistData = insertWishlistSchema.parse({
         userId: req.user!.id,
@@ -511,12 +511,12 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Health check endpoint for Railway
-  app.get("/api/health", (req, res) => {
+  app.get("/api/health/?", (req, res) => {
     res.json({ status: "healthy", timestamp: new Date().toISOString() });
   });
 
   // Auth providers check
-  app.get("/api/auth/providers", (req, res) => {
+  app.get("/api/auth/providers/?", (req, res) => {
     res.json({
       google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)
     });
