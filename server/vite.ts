@@ -68,3 +68,16 @@ export async function setupVite(app: Express, server: Server) {
     }
   });
 }
+
+export function serveStatic(app: Express) {
+  const distPath = path.resolve(__dirname, "..", "dist");
+  const htmlPath = path.resolve(distPath, "index.html");
+  
+  // Serve static assets from dist folder
+  app.use(express.static(distPath));
+  
+  // Serve index.html for all routes (SPA fallback)
+  app.get("*", (_req, res) => {
+    res.sendFile(htmlPath);
+  });
+}
