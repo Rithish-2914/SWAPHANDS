@@ -125,7 +125,9 @@ export function setupAuth(app: Express) {
         {
           clientID: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: "/api/auth/google/callback",
+          callbackURL: process.env.NODE_ENV === "production" 
+            ? "https://swaphands-production-c5a6.up.railway.app/api/auth/google/callback"
+            : "/api/auth/google/callback",
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
@@ -314,7 +316,7 @@ export function setupAuth(app: Express) {
     (req, res) => {
       // Successful authentication, redirect to dashboard
       res.redirect(process.env.NODE_ENV === "production" 
-        ? "/?auth=success" 
+        ? "https://swaphands-production-c5a6.up.railway.app/?auth=success" 
         : "http://localhost:5000/?auth=success"
       );
     }
