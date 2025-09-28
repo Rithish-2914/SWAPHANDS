@@ -33,6 +33,25 @@ app.get("/ping", (req, res) => {
   res.status(200).send("pong");
 });
 
+// Debug endpoint to check route registration
+app.get("/api/debug/routes", (req, res) => {
+  const routes: any[] = [];
+  app._router.stack.forEach((middleware: any) => {
+    if (middleware.route) {
+      routes.push({
+        path: middleware.route.path,
+        methods: Object.keys(middleware.route.methods)
+      });
+    }
+  });
+  res.json({ 
+    message: "Route debug info", 
+    routes: routes.filter(r => r.path?.includes('/api/')),
+    env: process.env.NODE_ENV,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Simple root health check - only for production
 // In development, Vite middleware handles the root route
 if (process.env.NODE_ENV === "production") {

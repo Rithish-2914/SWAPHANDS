@@ -52,6 +52,7 @@ function sanitizeUser(user: SelectUser): Omit<SelectUser, 'password'> {
 }
 
 export function setupAuth(app: Express) {
+  console.log("[AUTH] Starting setupAuth function, NODE_ENV:", process.env.NODE_ENV);
   // Validate required environment variables for production
   if (process.env.NODE_ENV === "production") {
     if (!process.env.RAILWAY_PUBLIC_DOMAIN) {
@@ -204,7 +205,9 @@ export function setupAuth(app: Express) {
   );
 
   // Routes with optional trailing slash for Railway compatibility
+  console.log("[AUTH] Registering /api/register POST route");
   app.post("/api/register", async (req, res, next) => {
+    console.log("[DEBUG] POST /api/register handler called with body:", req.body);
     try {
       // Normalize hostelBlock to lowercase to match schema enum values
       const normalizedBody = {

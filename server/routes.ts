@@ -37,6 +37,7 @@ function requireAdmin(req: any, res: any, next: any) {
 }
 
 export function registerRoutes(app: Express): Promise<void> {
+  console.log("[ROUTES] Starting registerRoutes function");
   // Setup authentication routes
   setupAuth(app);
 
