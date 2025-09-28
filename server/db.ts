@@ -28,6 +28,8 @@ if (!databaseUrl) {
     console.log(`🔄 Using default local database URL: ${databaseUrl}`);
     console.log('   (Update .env file with your actual database URL)');
   } else {
+    console.error("❌ DATABASE_URL must be set. Did you forget to provision a database?");
+    console.error("   Check your Railway environment variables.");
     throw new Error("DATABASE_URL must be set. Did you forget to provision a database?");
   }
 }

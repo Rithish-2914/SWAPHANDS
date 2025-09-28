@@ -126,8 +126,8 @@ export class DatabaseStorage implements IStorage {
       });
       console.log('🗄️  Using PostgreSQL session store');
     } catch (error) {
-      // Fallback to memory store for local development
-      console.warn('⚠️  Database not available, using memory session store for local development');
+      // Fallback to memory store if database connection fails
+      console.warn('⚠️  Database session store failed, using memory store:', error instanceof Error ? error.message : 'Unknown error');
       this.sessionStore = new createMemoryStore({
         checkPeriod: 86400000, // prune expired entries every 24h
       });

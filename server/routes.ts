@@ -1,5 +1,4 @@
 import type { Express } from "express";
-import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import { insertItemSchema, insertWishlistSchema, insertMessageSchema, insertLostFoundItemSchema, insertLostFoundClaimSchema } from "@shared/schema";
@@ -37,7 +36,7 @@ function requireAdmin(req: any, res: any, next: any) {
   next();
 }
 
-export function registerRoutes(app: Express): Server {
+export function registerRoutes(app: Express): Promise<void> {
   // Setup authentication routes
   setupAuth(app);
 
@@ -510,10 +509,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Health check endpoint for Railway
-  app.get("/api/health", (req, res) => {
-    res.json({ status: "healthy", timestamp: new Date().toISOString() });
-  });
+  // Health check is now registered early in server/index.ts
 
   // Auth providers check
   app.get("/api/auth/providers/?", (req, res) => {
@@ -525,6 +521,5 @@ export function registerRoutes(app: Express): Server {
   // Serve uploaded files
   app.use("/uploads", express.static("uploads"));
 
-  const httpServer = createServer(app);
-  return httpServer;
+  return Promise.resolve();
 }

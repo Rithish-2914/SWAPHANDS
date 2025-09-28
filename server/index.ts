@@ -1,10 +1,19 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Early health check - registers before database operations
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ 
+    status: "healthy", 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
+    server: "running"
+  });
+});
 
 // Fix for Railway deployment - rewrite trailing slashes without redirecting to preserve POST bodies
 app.use((req, res, next) => {
@@ -49,33 +58,45 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  const { createServer } = await import("http");
+  const server = createServer(app);
+
+  // Start server FIRST - this ensures health check is available immediately
+  const port = parseInt(process.env.PORT || '5000', 10);
+  server.listen(port, "0.0.0.0", () => {
+    log(`server listening on port ${port} - health check available`);
+  });
+
+  // Now try to register routes (including database operations)
+  try {
+    const { registerRoutes } = await import("./routes");
+    await registerRoutes(app);
+    log(`database routes registered successfully`);
+  } catch (error) {
+    console.error('Failed to register database routes:', error);
+    console.error('Server will continue running with health check only');
+    
+    // Add a fallback route for database errors (all HTTP methods)
+    app.all("/api/*", (req, res) => {
+      res.status(503).json({ 
+        message: "Database service temporarily unavailable",
+        error: "Please check database configuration"
+      });
+    });
+  }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
     res.status(status).json({ message });
-    throw err;
+    console.error('Express error:', err);
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
+  // Setup static serving after routes
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
-
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
-  
-  // Always bind to 0.0.0.0 for proper deployment
-  server.listen(port, "0.0.0.0", () => {
-    log(`serving on port ${port}`);
-  });
 })();
