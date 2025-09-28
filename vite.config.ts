@@ -27,7 +27,7 @@ export default defineConfig({
 
   build: {
     // Sets the output directory to the 'dist' folder at the project root
-    outDir: path.resolve(__dirname, "..", "dist"), 
+    outDir: path.resolve(__dirname, "dist"), 
     emptyOutDir: true,
   },
 });

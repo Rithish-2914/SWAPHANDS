@@ -32,16 +32,13 @@ app.get("/ping", (req, res) => {
   res.status(200).send("pong");
 });
 
-// Simple root health check
-app.get("/", (req, res) => {
-  // In production, this will be handled by static files
-  // In development or if static files fail, show a simple response
-  if (process.env.NODE_ENV === "production") {
+// Simple root health check - only for production
+// In development, Vite middleware handles the root route
+if (process.env.NODE_ENV === "production") {
+  app.get("/", (req, res) => {
     res.status(200).json({ message: "VIT SwapHands API Server Running" });
-  } else {
-    res.status(200).json({ message: "VIT SwapHands Development Server Running" });
-  }
-});
+  });
+}
 
 // Fix for Railway deployment - rewrite trailing slashes without redirecting
 app.use((req, res, next) => {
