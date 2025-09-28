@@ -61,43 +61,27 @@ export default function AuthPage() {
     });
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    try {
-      const response = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(registerForm),
-      });
-
-      const result = await response.json();
-      
-      if (response.ok && result.requiresVerification) {
-        setEmailVerificationForm({ ...emailVerificationForm, email: registerForm.email });
-        setShowEmailVerification(true);
-        toast({
-          title: "Account created successfully!",
-          description: "Please check your email for a verification code to complete your registration.",
-        });
-      } else if (response.ok && result.user) {
-        // User was auto-verified due to email service issues
-        toast({
-          title: "Account created successfully!",
-          description: result.message || "You can now start using VIT SwapHands.",
-        });
-        window.location.reload(); // Refresh to show logged-in state
-      } else {
-        throw new Error(result.message);
+    registerMutation.mutate(registerForm, {
+      onSuccess: (result) => {
+        if (result.requiresVerification) {
+          setEmailVerificationForm({ ...emailVerificationForm, email: registerForm.email });
+          setShowEmailVerification(true);
+          toast({
+            title: "Account created successfully!",
+            description: "Please check your email for a verification code to complete your registration.",
+          });
+        } else if (result.user) {
+          // User was auto-verified due to email service issues
+          toast({
+            title: "Account created successfully!",
+            description: result.message || "You can now start using VIT SwapHands.",
+          });
+          window.location.reload(); // Refresh to show logged-in state
+        }
       }
-    } catch (error) {
-      console.error("Registration error:", error);
-      toast({
-        title: "Registration failed",
-        description: error instanceof Error ? error.message : "Failed to create account",
-        variant: "destructive",
-      });
-    }
+    });
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
