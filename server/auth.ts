@@ -52,6 +52,19 @@ function sanitizeUser(user: SelectUser): Omit<SelectUser, 'password'> {
 }
 
 export function setupAuth(app: Express) {
+  // Validate required environment variables for production
+  if (process.env.NODE_ENV === "production") {
+    if (!process.env.RAILWAY_PUBLIC_DOMAIN) {
+      console.error('❌ RAILWAY_PUBLIC_DOMAIN is required for production Google OAuth');
+      console.error('   Set RAILWAY_PUBLIC_DOMAIN to your Railway app domain (e.g. my-app-production.up.railway.app)');
+      throw new Error('Missing RAILWAY_PUBLIC_DOMAIN environment variable in production');
+    }
+    if (!process.env.SESSION_SECRET) {
+      console.error('❌ SESSION_SECRET is required for production');
+      throw new Error('Missing SESSION_SECRET environment variable in production');
+    }
+  }
+
   // Generate a session secret if not provided (for local development)
   let sessionSecret = process.env.SESSION_SECRET;
   if (!sessionSecret) {
@@ -126,7 +139,7 @@ export function setupAuth(app: Express) {
           clientID: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
           callbackURL: process.env.NODE_ENV === "production" 
-            ? "https://swaphands-production-c5a6.up.railway.app/api/auth/google/callback"
+            ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}/api/auth/google/callback`
             : "/api/auth/google/callback",
         },
         async (accessToken, refreshToken, profile, done) => {
@@ -316,7 +329,7 @@ export function setupAuth(app: Express) {
     (req, res) => {
       // Successful authentication, redirect to dashboard
       res.redirect(process.env.NODE_ENV === "production" 
-        ? "https://swaphands-production-c5a6.up.railway.app/?auth=success" 
+        ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}/?auth=success`
         : "http://localhost:5000/?auth=success"
       );
     }
