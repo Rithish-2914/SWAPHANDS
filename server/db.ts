@@ -132,23 +132,25 @@ async function createDatabaseConnection() {
   throw lastError || new Error('Database connection failed after all retries');
 }
 
-// Initialize database connection
-try {
-  await createDatabaseConnection();
-} catch (error) {
-  console.error('Failed to initialize database:', error);
-  // In Railway, we might want to continue with a mock database for health checks
-  if (process.env.RAILWAY_ENVIRONMENT) {
-    console.warn('⚠️  Continuing with limited functionality - database unavailable');
-    // Create a mock database object to prevent crashes
-    db = {
-      select: () => ({ from: () => ({ where: () => Promise.resolve([]) }) }),
-      insert: () => ({ values: () => ({ returning: () => Promise.resolve([]) }) }),
-      update: () => ({ set: () => ({ where: () => ({ returning: () => Promise.resolve([]) }) }) }),
-      delete: () => ({ where: () => Promise.resolve({ rowCount: 0 }) })
-    } as any;
-  } else {
-    throw error;
+// Initialize database connection function to be called when needed
+export async function initializeDatabase() {
+  try {
+    await createDatabaseConnection();
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
+    // In Railway, we might want to continue with a mock database for health checks
+    if (process.env.RAILWAY_ENVIRONMENT) {
+      console.warn('⚠️  Continuing with limited functionality - database unavailable');
+      // Create a mock database object to prevent crashes
+      db = {
+        select: () => ({ from: () => ({ where: () => Promise.resolve([]) }) }),
+        insert: () => ({ values: () => ({ returning: () => Promise.resolve([]) }) }),
+        update: () => ({ set: () => ({ where: () => ({ returning: () => Promise.resolve([]) }) }) }),
+        delete: () => ({ where: () => Promise.resolve({ rowCount: 0 }) })
+      } as any;
+    } else {
+      throw error;
+    }
   }
 }
 

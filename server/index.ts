@@ -1,5 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { setupVite, serveStatic, log } from "./vite";
+import { initializeDatabase } from "./db";
 
 const app = express();
 app.use(express.json());
@@ -123,6 +124,15 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
       console.error(`Port ${port} is already in use`);
     }
   });
+
+  // Initialize database first
+  try {
+    await initializeDatabase();
+    log('Database initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
+    console.warn('Continuing with limited functionality...');
+  }
 
   // Now try to register routes (including database operations) with timeout
   const routeRegistrationPromise = new Promise(async (resolve, reject) => {
