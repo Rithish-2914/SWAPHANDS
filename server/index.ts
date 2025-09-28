@@ -41,6 +41,25 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
+// Force HTTPS in production (Railway fix for 405 errors)
+if (process.env.NODE_ENV === "production") {
+  app.use((req, res, next) => {
+    // Skip health checks
+    if (req.path === '/api/health' || req.path === '/ping') {
+      return next();
+    }
+    
+    // Check if request is HTTP instead of HTTPS
+    const proto = req.header('x-forwarded-proto') || req.protocol;
+    if (proto !== 'https') {
+      // Redirect to HTTPS version
+      return res.redirect(301, `https://${req.get('host')}${req.originalUrl}`);
+    }
+    
+    next();
+  });
+}
+
 // Fix for Railway deployment - rewrite trailing slashes without redirecting
 app.use((req, res, next) => {
   // Skip for static files and health checks
