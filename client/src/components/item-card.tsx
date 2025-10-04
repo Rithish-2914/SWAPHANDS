@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Heart, Package, User, Sparkles } from "lucide-react";
+import { Heart, Package, User } from "lucide-react";
 import { SendMessageDialog } from "@/components/send-message-dialog";
 import { fadeInUp, cardHover } from "@/lib/motion";
 import type { Item, User as UserType } from "@shared/schema";
@@ -20,7 +20,6 @@ export function ItemCard({ item, showSeller = false }: ItemCardProps) {
   const queryClient = useQueryClient();
   const [isWishlisted, setIsWishlisted] = useState(false);
   
-  // Fetch current user to check if they can message the seller
   const { data: currentUser } = useQuery<UserType>({ queryKey: ["/api/user"] });
 
   const toggleWishlistMutation = useMutation({
@@ -50,7 +49,6 @@ export function ItemCard({ item, showSeller = false }: ItemCardProps) {
     },
   });
 
-  // Fix: Add a null check for the location parameter
   const formatLocation = (location: string | null) => {
     if (!location) return "";
     return location.split('-').map(word => 
@@ -58,13 +56,11 @@ export function ItemCard({ item, showSeller = false }: ItemCardProps) {
     ).join('-');
   };
 
-  // Fix: Add a null check for the category parameter
   const formatCategory = (category: string | null) => {
     if (!category) return "";
     return category.charAt(0).toUpperCase() + category.slice(1);
   };
 
-  // Fix: Add a null check for the category parameter
   const getCategoryColor = (category: string | null) => {
     switch (category) {
       case "books":
@@ -89,7 +85,6 @@ export function ItemCard({ item, showSeller = false }: ItemCardProps) {
       variants={fadeInUp}
       initial="hidden"
       animate="visible"
-      whileHover="hover"
     >
       <motion.div
         variants={cardHover}
@@ -102,7 +97,6 @@ export function ItemCard({ item, showSeller = false }: ItemCardProps) {
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           
           <div className="relative">
-            {/* Fix: Check that item.photos is not null before accessing its length or elements */}
             {item.photos && item.photos.length > 0 ? (
               <div className="relative overflow-hidden">
                 <motion.img
@@ -138,7 +132,6 @@ export function ItemCard({ item, showSeller = false }: ItemCardProps) {
       
           <CardContent className="p-4 relative">
             <div className="flex items-center justify-between mb-2">
-              {/* Fix: Pass a potentially null category to the function */}
               <motion.span 
                 className={`text-xs px-3 py-1 rounded-full font-medium ${getCategoryColor(item.category ?? null)} backdrop-blur-sm`}
                 whileHover={{ scale: 1.05 }}
@@ -181,7 +174,6 @@ export function ItemCard({ item, showSeller = false }: ItemCardProps) {
             </p>
             
             <div className="flex items-center justify-between mb-3">
-              {/* Fix: Use optional chaining to handle a potentially null price */}
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="relative"
@@ -201,7 +193,6 @@ export function ItemCard({ item, showSeller = false }: ItemCardProps) {
               </span>
             </div>
             
-            {/* Contact Seller Section */}
             <div className="mt-3 pt-3 border-t border-border/50">
               <SendMessageDialog 
                 item={item} 
@@ -224,7 +215,6 @@ export function ItemCard({ item, showSeller = false }: ItemCardProps) {
           </CardContent>
         </Card>
 
-        {/* Animated glow effect on hover */}
         <motion.div
           className="absolute -inset-[1px] bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-lg opacity-0 group-hover:opacity-20 blur-xl -z-10 transition-opacity duration-500"
           initial={false}

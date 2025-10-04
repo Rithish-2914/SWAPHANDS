@@ -1,4 +1,5 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -17,22 +18,35 @@ import MyItemsPage from "@/pages/my-items-page";
 import AdminPage from "@/pages/admin-page";
 import { LostFoundPage } from "@/pages/lost-found-page";
 import { MessagesPage } from "@/pages/messages-page";
+import { pageTransition } from "@/lib/motion";
 
 function Router() {
+  const [location] = useLocation();
+  
   return (
-    <Switch>
-      <ProtectedRoute path="/" component={HomePage} />
-      <ProtectedRoute path="/browse" component={BrowsePage} />
-      <ProtectedRoute path="/sell" component={SellItemPage} />
-      <ProtectedRoute path="/wishlist" component={WishlistPage} />
-      <ProtectedRoute path="/profile" component={ProfilePage} />
-      <ProtectedRoute path="/my-items" component={MyItemsPage} />
-      <ProtectedRoute path="/lost-found" component={LostFoundPage} />
-      <ProtectedRoute path="/messages" component={MessagesPage} />
-      <ProtectedRoute path="/admin" component={AdminPage} />
-      <Route path="/auth" component={AuthPage} />
-      <Route component={NotFound} />
-    </Switch>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location}
+        variants={pageTransition}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        <Switch location={location}>
+          <ProtectedRoute path="/" component={HomePage} />
+          <ProtectedRoute path="/browse" component={BrowsePage} />
+          <ProtectedRoute path="/sell" component={SellItemPage} />
+          <ProtectedRoute path="/wishlist" component={WishlistPage} />
+          <ProtectedRoute path="/profile" component={ProfilePage} />
+          <ProtectedRoute path="/my-items" component={MyItemsPage} />
+          <ProtectedRoute path="/lost-found" component={LostFoundPage} />
+          <ProtectedRoute path="/messages" component={MessagesPage} />
+          <ProtectedRoute path="/admin" component={AdminPage} />
+          <Route path="/auth" component={AuthPage} />
+          <Route component={NotFound} />
+        </Switch>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 

@@ -1,15 +1,20 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { NavigationHeader } from "@/components/navigation-header";
 import { ItemCard } from "@/components/item-card";
-import { Search, Package } from "lucide-react";
+import { FloatingActionButton } from "@/components/floating-action-button";
+import { Search, Package, Plus } from "lucide-react";
+import { useLocation } from "wouter";
+import { staggerContainer, fadeInUp } from "@/lib/motion";
 import type { Item } from "@shared/schema";
 
 export default function BrowsePage() {
+  const [, navigate] = useLocation();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
@@ -44,7 +49,12 @@ export default function BrowsePage() {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Search and Filters */}
-        <Card className="mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card className="mb-6 border-2 border-transparent hover:border-blue-500/20 transition-colors duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
           <CardContent className="p-6">
             <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row gap-4">
               <div className="flex-1 relative">
@@ -101,25 +111,44 @@ export default function BrowsePage() {
             </form>
           </CardContent>
         </Card>
+        </motion.div>
 
         {/* Results */}
         {isLoading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-2 text-muted-foreground">Loading items...</p>
-          </div>
+          <motion.div 
+            className="text-center py-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <motion.div 
+              className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            />
+            <p className="mt-4 text-muted-foreground font-medium">Loading amazing items...</p>
+          </motion.div>
         ) : items.length > 0 ? (
           <>
-            <div className="mb-4">
-              <p className="text-muted-foreground" data-testid="text-results-count">
-                Found {items.length} item{items.length !== 1 ? "s" : ""}
+            <motion.div 
+              className="mb-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <p className="text-muted-foreground font-medium" data-testid="text-results-count">
+                Found {items.length} awesome item{items.length !== 1 ? "s" : ""} ✨
               </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            </motion.div>
+            <motion.div 
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+            >
               {items.map((item) => (
                 <ItemCard key={item.id} item={item} showSeller />
               ))}
-            </div>
+            </motion.div>
           </>
         ) : (
           <Card>
@@ -149,6 +178,12 @@ export default function BrowsePage() {
           </Card>
         )}
       </div>
+
+      <FloatingActionButton
+        onClick={() => navigate("/sell")}
+        icon={<Plus className="h-6 w-6" />}
+        label="Sell Item"
+      />
     </div>
   );
 }
