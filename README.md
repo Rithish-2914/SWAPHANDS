@@ -2,6 +2,52 @@
 
 A full-stack web application for VIT (Vellore Institute of Technology) students to buy, sell, and exchange items within the campus community. Built with React, TypeScript, Express.js, and PostgreSQL.
 
+## 📖 Table of Contents
+- [How to Run the Website](#-how-to-run-the-website)
+- [Quick Start for Local Development](#-quick-start-for-local-development)
+- [Deploy to Vercel](#-deploy-to-vercel-recommended)
+- [Database Management](#-database-management)
+- [Troubleshooting](#-troubleshooting)
+
+## ▶️ How to Run the Website
+
+### For Development (Local Machine or Replit)
+
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+2. **Set up your database**:
+   - On Replit: Database is automatically provisioned
+   - On local machine: Set up PostgreSQL (see [Database Setup](#choose-your-database-setup))
+
+3. **Configure environment** (if .env doesn't exist):
+   ```bash
+   # On Replit: DATABASE_URL is already set
+   # On local: Create .env file with your DATABASE_URL
+   echo "DATABASE_URL=your-database-url" > .env
+   echo "SESSION_SECRET=your-secret-key" >> .env
+   ```
+
+4. **Initialize database schema**:
+   ```bash
+   npm run db:push
+   ```
+
+5. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
+
+6. **Open your browser**:
+   - On Replit: Click the webview or open the provided URL
+   - On local: Visit `http://localhost:5000`
+
+### For Production (Vercel)
+
+See the [Deploy to Vercel](#-deploy-to-vercel-recommended) section below for complete deployment guide.
+
 ## 🚀 Quick Start for Local Development
 
 ### Prerequisites
@@ -233,39 +279,192 @@ The application is configured for deployment on:
 - **DigitalOcean App Platform**
 - **Heroku**
 
-## 🚀 Deploy to Vercel
+## 🚀 Deploy to Vercel (Recommended)
 
-This repo includes `vercel.json` and is ready for Vercel.
+This application is configured and ready for Vercel deployment with `vercel.json` included.
 
-### Setup Steps
-- Import the repository in Vercel: https://vercel.com/new
-- Set Environment Variables in Project → Settings → Environment Variables:
-  - `DATABASE_URL` — required (Neon/Supabase/PostgreSQL)
-  - `SESSION_SECRET` — recommended for production sessions
-  - `GMAIL_USER`, `GMAIL_APP_PASSWORD` — optional (email verification/reset)
-  - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — optional (Google OAuth)
-- These keys are documented in `.env.example`.
+### 📋 Prerequisites
 
-### Build & Output
-- Build command: `npm run build` (referenced by `vercel-build`)
-- Output directory: `dist/public`
-- Functions: `api/*.ts` built with `@vercel/node`
+Before deploying to Vercel, ensure you have:
+- A GitHub/GitLab account with your project repository
+- A Vercel account ([sign up free](https://vercel.com/signup))
+- A PostgreSQL database (Neon, Supabase, or Railway recommended)
 
-### Routing
-- API: `/api/(.*)` → `/api/$1`
-- Static files served from `dist/public`
-- SPA fallback: unmatched routes serve `dist/public/index.html` so client-side routing works
+### 🔧 Step-by-Step Deployment Guide
 
-### Notes
-- On Vercel, only `api/*` serverless functions run; the Express server in `server/` is for local dev or non-Vercel hosting.
-- Client calls to `/api/...` will work only for functions implemented under `api/`. Routes in `server/routes.ts` must be ported to `api/*` to be available on Vercel.
-- Alternatively, deploy the Express API to a server (Railway/Render/Fly.io) and configure the client to use that external `API_BASE_URL` in production.
+#### Step 1: Prepare Your Database
 
-### CLI Deploy (Optional)
-1. Install CLI: `npm i -g vercel`
-2. Login: `vercel login` (or use `VERCEL_TOKEN`)
-3. Deploy preview: `vercel`
-4. Deploy production: `vercel --prod`
+1. **Create a Production Database** (Choose one):
+   
+   **Option A: Neon (Recommended - Free tier)**
+   - Go to [Neon Console](https://console.neon.tech)
+   - Create a new project
+   - Copy the connection string
+   
+   **Option B: Supabase**
+   - Go to [Supabase Dashboard](https://supabase.com/dashboard)
+   - Create new project
+   - Get "Transaction pooler" connection string from Settings → Database
+   
+   **Option C: Railway**
+   - Go to [Railway](https://railway.app)
+   - Create PostgreSQL database
+   - Copy the DATABASE_URL from variables
+
+2. **Push Database Schema**:
+   ```bash
+   # Set your production DATABASE_URL temporarily
+   DATABASE_URL="your-production-database-url" npm run db:push
+   ```
+
+#### Step 2: Deploy to Vercel
+
+##### Method 1: Using Vercel Dashboard (Easiest)
+
+1. **Import Your Repository**:
+   - Go to [Vercel Dashboard](https://vercel.com/new)
+   - Click "Import Project"
+   - Select your Git repository
+   - Click "Import"
+
+2. **Configure Environment Variables**:
+   
+   In the Vercel import screen, add these environment variables:
+
+   **Required Variables:**
+   ```
+   DATABASE_URL=your-production-database-connection-string
+   SESSION_SECRET=your-secure-random-string-at-least-32-characters
+   NODE_ENV=production
+   ```
+
+   **Optional Variables (for full functionality):**
+   ```
+   GMAIL_USER=your-email@gmail.com
+   GMAIL_APP_PASSWORD=your-gmail-app-password
+   GOOGLE_CLIENT_ID=your-google-oauth-client-id
+   GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
+   ```
+
+3. **Deploy**:
+   - Click "Deploy"
+   - Wait 2-3 minutes for build to complete
+   - Your app will be live at `your-project.vercel.app`
+
+##### Method 2: Using Vercel CLI
+
+1. **Install Vercel CLI**:
+   ```bash
+   npm i -g vercel
+   ```
+
+2. **Login to Vercel**:
+   ```bash
+   vercel login
+   ```
+
+3. **Deploy**:
+   ```bash
+   # Preview deployment
+   vercel
+   
+   # Production deployment
+   vercel --prod
+   ```
+
+4. **Set Environment Variables via CLI**:
+   ```bash
+   vercel env add DATABASE_URL production
+   vercel env add SESSION_SECRET production
+   # Add other variables as needed
+   ```
+
+#### Step 3: Configure Google OAuth (Optional)
+
+If you want Google OAuth login:
+
+1. **Update Google Cloud Console**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com)
+   - Select your OAuth project
+   - Go to "Credentials"
+   - Edit your OAuth 2.0 Client
+   - Add Authorized redirect URI: `https://your-project.vercel.app/api/auth/google/callback`
+
+2. **Add to Vercel Environment Variables**:
+   ```
+   GOOGLE_CLIENT_ID=your-client-id
+   GOOGLE_CLIENT_SECRET=your-client-secret
+   ```
+
+#### Step 4: Verify Deployment
+
+1. **Test Your Live Site**:
+   - Visit `https://your-project.vercel.app`
+   - Try registering a new user
+   - Test login functionality
+   - Check if database operations work
+
+2. **Check Deployment Logs**:
+   - Go to Vercel Dashboard → Your Project → Deployments
+   - Click on latest deployment
+   - View "Build Logs" and "Function Logs" for any errors
+
+### 🔄 Redeployment
+
+Any push to your main branch will automatically trigger a new deployment.
+
+To manually redeploy:
+- Go to Vercel Dashboard → Your Project → Deployments
+- Click "Redeploy" on any previous deployment
+
+### ⚙️ Build Configuration
+
+The project uses these Vercel settings (defined in `vercel.json`):
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **API Routes**: Serverless functions in `api/` directory
+- **Framework**: React + Express (Hybrid)
+
+### 🔍 Troubleshooting Vercel Deployment
+
+**Issue: Build Fails**
+- Check build logs in Vercel dashboard
+- Ensure all environment variables are set
+- Verify `package.json` dependencies are correct
+
+**Issue: Database Connection Error**
+- Verify DATABASE_URL is correct
+- Check database allows external connections
+- Ensure database is not paused (free tier databases)
+
+**Issue: 500 Internal Server Error**
+- Check Function Logs in Vercel dashboard
+- Verify environment variables are set in production
+- Ensure database schema is pushed (`npm run db:push`)
+
+**Issue: Google OAuth Not Working**
+- Verify redirect URI in Google Console matches Vercel URL
+- Check GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are set
+- Ensure OAuth consent screen is configured
+
+### 💰 Vercel Pricing
+
+- **Hobby Plan (Free)**: Perfect for personal projects
+  - Unlimited deployments
+  - 100GB bandwidth/month
+  - Serverless functions included
+  
+- **Pro Plan ($20/month)**: For production apps
+  - 1TB bandwidth/month
+  - Advanced analytics
+  - Team collaboration
+
+### 🌐 Custom Domain (Optional)
+
+1. Go to Vercel Dashboard → Your Project → Settings → Domains
+2. Add your custom domain
+3. Update DNS records as instructed by Vercel
+4. Update Google OAuth redirect URI if using OAuth
 
 ## 🧪 Testing the Application
 
