@@ -37,6 +37,15 @@ Item photos are handled through Multer middleware with file size limits and type
 ## Development Environment
 The application is configured for **Replit** development with specific plugins and error handling. The development setup includes hot module replacement through Vite, TypeScript checking, and automatic server restarts.
 
+## Current Replit Setup (October 2025)
+- **Node.js**: Version 20 installed
+- **Database**: PostgreSQL (Neon/Serverless) connected and configured
+- **Environment Variables**: DATABASE_URL and related database credentials configured
+- **Workflow**: "Start application" runs `npm run dev` on port 5000 with webview output
+- **Server**: Express server listening on 0.0.0.0:5000
+- **Vite Configuration**: Configured with `allowedHosts: true` for Replit proxy compatibility
+- **Database Schema**: All tables created and synchronized using `npm run db:push`
+
 # External Dependencies
 
 ## Database
